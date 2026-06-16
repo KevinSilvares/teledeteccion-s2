@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import xarray as xr
 import rioxarray as riox
@@ -8,6 +9,9 @@ class RasterTiler():
     """
     Handles the generation of matched low-res and high-res raster patches.
     """
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
     def tile(
         self, 
         raster_lr: xr.DataArray,
@@ -61,7 +65,7 @@ class RasterTiler():
 
                     self._save_files(file_name, patch_lr, patch_hr, output_path_lr, output_path_hr)
 
-        print(f"Saving pair {num:04d} LR ({tile_size}) | HR ({tile_size * scale_factor})")
+        self.logger.info(f"Saving pair {num:04d} LR ({tile_size}) | HR ({tile_size * scale_factor})")
 
     
     def _save_files(

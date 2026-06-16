@@ -1,22 +1,28 @@
+import logging
 from pathlib import Path
 import xarray as xr
 import rioxarray as riox
+
+
+logger = logging.getLogger(__name__)
 
 
 def join_rasters(self, rgb_path: Path | str, nir_path: Path | str) -> xr.DataArray:    
     """
     Joins a RGB raster with the NIR band of a False-Color raster to create a 4-band RGBNir DataArray.
     """    
-    print(f"Reading files: {Path(rgb_path).name} | {Path(nir_path).name}")
+    logger.info(f"Reading files: {Path(rgb_path).name} | {Path(nir_path).name}")
     raster_rgb = riox.open_rasterio(Path(rgb_path))
     raster_nir = riox.open_rasterio(Path(nir_path))
 
     if (raster_rgb.rio.width != raster_nir.rio.width) or (raster_rgb.rio.height != raster_nir.rio.height):
+        logger.error(f"Size mismatch: RGB {raster_rgb.rio.shape}, NIR {raster_nir.rio.shape}")
         raise ValueError(f"Size mismatch: RGB is {raster_rgb.rio.shape}, NIR is {raster_nir.shape}")
     if raster_rgb.crs != raster_nir.crs:
+        logger.error(f"CRS mismatch between RGB and NIR rasters. RGB: {raster_rgb.crs}, NIR: {raster_nir.crs}")
         raise ValueError(f"CRS mismatch between RGB and NIR rasters. RGB: {raster_rgb.crs}, NIR: {raster_nir.crs}")
 
-    print("Joining rasters")
+    logger.debug("Joining rasters")
     # Assuming NIR is the first band in the false-color image as it is in PNOA imagery
     nir = raster_nir.sel(band = 1)
     nir = nir.expand_dims(dim = "band")
@@ -47,4 +53,4 @@ def save_raster_to_disk(self, raster_rgbn: xr.DataArray, output_path: Path | str
         BIGTIFF = "YES"
     )       
 
-    print(f"Raster saved to {output_path}")
+    logger.info(f"Raster saved to {output_path}")
