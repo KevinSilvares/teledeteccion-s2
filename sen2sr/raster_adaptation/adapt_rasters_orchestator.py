@@ -1,8 +1,8 @@
 import logging
 from pathlib import Path
 
-from raster_resampler import RasterResampler
-from tiler import RasterTiler
+import tiler
+import raster_resampler as resampler
 import rgbn_joiner as rgbn_j 
 
 
@@ -19,7 +19,7 @@ def _resolve_paths(base_dir: Path) -> tuple[Path, Path, Path, Path]:
     """
     Resolves data input and output directories dynamically based on script location.
     """
-    # Not a big fan of magic strings. Might change.
+    # Not a big fan of magic strings. Might change. ARGS_PARSE TO BE ADDED
     rgb_path = base_dir / "data" / "rgb_files"
     nir_path = base_dir / "data" / "nir_files"
     output_lr = base_dir / "data" / "lr"
@@ -29,12 +29,11 @@ def _resolve_paths(base_dir: Path) -> tuple[Path, Path, Path, Path]:
 
 def main():
     script_dir = Path(__file__).resolve().parent.parent
-    rgb_path, nir_path, output_lr, output_hr, = _resolve_paths(script_dir)
+    rgb_path, nir_path, output_lr, output_hr = _resolve_paths(script_dir)
 
-    resampler = RasterResampler()
     tiler = RasterTiler()
 
-    # Searchs for the file name pattern. File names are identical until the _IRG_ part, which identifies false-color
+    # Searches for the file name pattern. File names are identical until the _IRG_ part, which identifies false-color
     nir_files = sorted(list(nir_path.glob("*_IRG_*.tif")))
     logging.info(f"Found {len(nir_files)} elements to process.")
 
@@ -62,14 +61,14 @@ def main():
                 raster_lr = raster_lr,
                 raster_hr = raster_hr,
                 output_path_lr = output_lr,
-                outputh_path_hr = output_hr,
+                output_path_hr = output_hr,
                 patch_size = PATCH_SIZE,
                 overlap = OVERLAP
             )
         except Exception as e:
             logging.error(f"Failed to process {rgb_file_name}: {e}")
 
-    logginf.info("=== Pipeline Processing Finished ===")
+    loggin.info("=== Pipeline Processing Finished ===")
 
 
 if __name__ == "__main__":
