@@ -1,4 +1,5 @@
 import logging
+from tqdm import tqdm
 from pathlib import Path
 
 import tiler
@@ -31,26 +32,30 @@ def main():
     script_dir = Path(__file__).resolve().parent.parent
     rgb_path, nir_path, output_lr, output_hr = _resolve_paths(script_dir)
 
-    tiler = RasterTiler()
-
     # Searches for the file name pattern. File names are identical until the _IRG_ part, which identifies false-color
     nir_files = sorted(list(nir_path.glob("*_IRG_*.tif")))
     logging.info(f"Found {len(nir_files)} elements to process.")
 
-    for nir_file_path in nir_files:
+    if not nir_files:
+        logging.info(f"No NIR files found in {nir_path}. Exiting")
+        return
+
+    progress_bar = tqdm(nir_files, unit = "pair", dynamic_ncols = True)
+
+    for nir_file_path in progress_bar:
         nir_file_name = nir_file_path.name
         rgb_file_name = nir_file_name.replace("IRG_", "")
         rgb_file_path = rgb_path / rgb_file_name
 
         if not rgb_file_path.exists():
-            logging.warning(f"No RGB pair founded for {nir_file_name}. Skipping.")
+            tqdm.write(f"No RGB pair founded for {nir_file_name}. Skipping.")
             continue
 
-        logging.info(f"Processing pair: {rgb_file_name}")
+        progress_bar.set_description(f"Processing {rgb_file_name}")
 
         try:
             # 4-band RGBNir raster
-            raster_rgbn = rgbn_j.join_rasters(rgb_file_path, nir_file_path)
+            raster_rgbn = rgbn_j.join_rgb_nir(rgb_file_path, nir_file_path)
 
             # Resample 2.5 m/px HR and 10 m/px LR
             raster_hr = resampler.resample(raster = raster_rgbn, res = 2.5)
@@ -62,13 +67,13 @@ def main():
                 raster_hr = raster_hr,
                 output_path_lr = output_lr,
                 output_path_hr = output_hr,
-                patch_size = PATCH_SIZE,
+                tile_size = PATCH_SIZE,
                 overlap = OVERLAP
             )
         except Exception as e:
-            logging.error(f"Failed to process {rgb_file_name}: {e}")
+            tqdm.write(f"Failed to process {rgb_file_name}: {e}")
 
-    loggin.info("=== Pipeline Processing Finished ===")
+    logging.info("=== Pipeline Processing Finished ===")
 
 
 if __name__ == "__main__":

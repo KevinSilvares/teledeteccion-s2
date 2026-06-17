@@ -20,7 +20,7 @@ def join_rgb_nir(rgb_path: Path | str, nir_path: Path | str) -> xr.DataArray:
         error_message = f"Size mismatch: RGB {raster_rgb.rio.shape}, NIR {raster_nir.rio.shape}"
         logger.error(error_message)
         raise ValueError(error_message)
-    if raster_rgb.crs != raster_nir.crs:
+    if raster_rgb.rio.crs != raster_nir.rio.crs:
         error_message = f"CRS mismatch between RGB and NIR rasters. RGB: {raster_rgb.crs}, NIR: {raster_nir.crs}"
         logger.error(error_message)
         raise ValueError(error_message)
