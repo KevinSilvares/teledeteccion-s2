@@ -20,12 +20,15 @@ class CopernicusClient:
     Handles authentication and data ingestion from the Copernicus Processing API.
     """
 
-    def __init__(self):
+    def __init__(self, client_id: str, client_secret: str):
         self.URL_REQUEST = "https://sh.dataspace.copernicus.eu/process/v1"
         self.EPSG_HEMISFERIO_NORTE_BASE = 32600
         self.EPSG_HEMISFERIO_SUR_BASE = 32700
         self.DEFAULT_EPSG = "3857"
         self.oauth = None
+
+        self.client_id = client_id
+        self.client_secret = client_secret
 
         self.logger = logging.basicConfig(level = logging.INFO, format = "%(levelname)s: %(message)s")
 
@@ -38,15 +41,12 @@ class CopernicusClient:
         if self.oauth:
             return self.oauth
         else:
-            load_dotenv()
-            client_id = os.getenv("CLIENT_ID")
-            client_secret = os.getenv("CLIENT_SECRET")
-            client = BackendApplicationClient(client_id = client_id)
+            client = BackendApplicationClient(client_id = self.client_id)
 
             oauth_copernicus = OAuth2Session(client = client)
             oauth_copernicus.fetch_token(
                 token_url = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token",
-                client_secret = client_secret,
+                client_secret = self.client_secret,
                 include_client_id = True,
             )
 
@@ -54,10 +54,12 @@ class CopernicusClient:
         return self.oauth
 
 
-    def request(self, oauth: OAuth2Session, payload: str, destino: Path, file_name: str, retries: int = 3) -> bool:
+    def request(self, payload: str, dest: Path, file_name: str, retries: int = 3) -> bool:
         """
         Makes an HTTP request. Implements error handling and automatic oauth re-generation. Saves the TIFF.
         """
+
+        oauth = self.get_copernicus_authenticated_session()
         try:
             response = oauth.post(
                 self.URL_REQUEST,
@@ -67,7 +69,7 @@ class CopernicusClient:
 
             if response.status_code == 401:
                 self.logger.warning("Token expired. Re-authenticating.")
-                oauth = self.get_copernicus_authenticated_session()
+                oauth = None
                 return self.request(oauth, payload, destino, file_name)
             elif response.status_code == 429:
                 self.logger.info(f"Rate limit hit. Waiting 30 seconds. Retries left: {retries - 1}")
@@ -188,25 +190,3 @@ class CopernicusClient:
         }
 
         return payload
-
-
-if __name__ == "__main__":
-    bboxes = aoigen.generate_grid_from_wgs84(
-        min_lon = -5.733359,
-        min_lat = 42.675830,
-        max_lon = -5.691903,
-        max_lat = 42.660368
-    )
-
-    s2_api = S2_API()
-
-    oauth = s2_api.get_copernicus_authenticated_session()
-    dest = Path(__file__).resolve().parent.parent / "data" / "ingest"
-
-    for patches in bboxes:
-        unique_id = uuid.uuid4().hex[:8]
-        file_name = f"S2_{parche['id_patch']}_{unique_id}.tif"
-
-        self.logger.info(f"Processing {nombre_archivo}")
-
-        s2_api.request(oauth, s2_hub.get_10_bands_s2_payload(parche["poi"], "2023-07-01", "2023-08-31"), dest, file_name) 
