@@ -5,6 +5,7 @@ import json
 import uuid
 import logging
 import numpy as np
+from datetime import date
 from pathlib import Path
 from dotenv import load_dotenv
 from oauthlib.oauth2 import BackendApplicationClient
@@ -12,7 +13,7 @@ from requests_oauthlib import OAuth2Session
 from pyproj import Transformer
 
 
-from aoi_generator import aoi_gen
+import aoi_generator as aoi_gen
 
 
 class CopernicusClient:
@@ -30,8 +31,7 @@ class CopernicusClient:
         self.client_id = client_id
         self.client_secret = client_secret
 
-        self.logger = logging.basicConfig(level = logging.INFO, format = "%(levelname)s: %(message)s")
-
+        self.logger = logging.getLogger(__name__)
 
     def get_copernicus_authenticated_session(self) -> OAuth2Session:
         """
@@ -70,11 +70,11 @@ class CopernicusClient:
             if response.status_code == 401:
                 self.logger.warning("Token expired. Re-authenticating.")
                 oauth = None
-                return self.request(oauth, payload, destino, file_name)
+                return self.request(payload, dest, file_name, retries)
             elif response.status_code == 429:
                 self.logger.info(f"Rate limit hit. Waiting 30 seconds. Retries left: {retries - 1}")
                 time.sleep(30)
-                return self.request(oauth, payload, destino, file_name, retries - 1)
+                return self.request(payload, dest, file_name, retries - 1)
             elif response.status_code not in (200, 401, 429):
                 self.logger.error(f"{response.text}")
                 return False
@@ -82,8 +82,8 @@ class CopernicusClient:
             response.raise_for_status()
 
             # Saves the file
-            filepath = destino / nombre_archivo
-            destino.mkdir(parents = True, exist_ok = True)
+            filepath = dest / file_name
+            dest.mkdir(parents = True, exist_ok = True)
 
             with open(filepath, "wb") as f:
                 f.write(response.content)
@@ -97,12 +97,12 @@ class CopernicusClient:
 
     def _get_api_bbox(self, poi: dict[str, float], height_pixels: int = 512, width_pixels: int = 512, res_m: float = 10):
         """
-        Translates a center POI into a bounding box dictionary formatted for the Copernicus API.
+        Translates a center poi into a bounding box dictionary formatted for the Copernicus API.
         """
         if height_pixels % 128 != 0 or width_pixels % 128 != 0:
             raise ValueError("Height and width pixels must be a multiple of 128 (it's recommended 128, 256, 512).")
 
-        epsg = aoigen.calc_epsg(poi["lon"], poi["lat"])
+        epsg = aoi_gen.calc_epsg(poi["lon"], poi["lat"])
 
         # Calculates dimensions in meters
         height_meters = height_pixels * res_m
@@ -113,10 +113,10 @@ class CopernicusClient:
         transformer = Transformer.from_crs("EPSG:4326", f"EPSG:{epsg}", always_xy = True)
         center_x, center_y = transformer.transform(poi["lon"], poi["lat"])
 
-        min_x = centro_x - mitad_ancho_m
-        max_x = centro_x + mitad_ancho_m
-        min_y = centro_y - mitad_alto_m
-        max_y = centro_y + mitad_alto_m
+        min_x = center_x - half_width_m
+        max_x = center_x + half_width_m
+        min_y = center_y - half_heigth_m
+        max_y = center_y + half_heigth_m
 
         return {
             "properties": {
@@ -127,17 +127,17 @@ class CopernicusClient:
 
 
     def get_10_bands_s2_payload(self,
-        POI: POI,
+        poi: dict[str, float],
         date_start: str | date,
         date_end: str | date,
         height_pixels: int = 512,
         width_pixels: int = 512,
         max_cloud_coverage: int = 10
-        ) -> str:
+        ) -> dict:
         """
         Constructs the JSON payload for a 10-band Sentinel-2 request.
         """
-        bbox_dict = self._get_api_bbox(POI, height_pixels, width_pixels)
+        bbox_dict = self._get_api_bbox(poi, height_pixels, width_pixels)
         evalscript = """
         //VERSION=3
         function setup() {

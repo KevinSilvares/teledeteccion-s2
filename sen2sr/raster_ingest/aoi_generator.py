@@ -23,7 +23,7 @@ def _generate_bboxes(columns: int,
     min_x_utm: float,
     min_y_utm: float,
     patch_size: int = 5120
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, any]]:
     """
     Generates a list of bounding boxes and calculates their center POI in WGS84.
     """
@@ -54,7 +54,7 @@ def _generate_bboxes(columns: int,
     return bboxes
 
 
-def generate_grid_from_wgs84(min_lon: float, min_lat: float, max_lon: float, max_lat: float, patch_size: int = 5120) -> list[dict[str, Any]]:
+def generate_grid_from_wgs84(min_lon: float, min_lat: float, max_lon: float, max_lat: float, patch_size: int = 5120) -> list[dict[str, any]]:
     """
     Generates a grid of patches transforming coordinates from WGS84 (EPSG:4326) to a dynamically calculated EPSG.
     """
