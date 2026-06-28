@@ -7,6 +7,10 @@ from torch.utils.data import Dataset
 
 
 class SRDataset(Dataset):
+    """
+    PyTorch Dataset for Sentinel-2 Super-Resolution.
+    Handles dynamic reading, normalization and on-the-fly corrupt file fallback.
+    """
     def __init__(self, lr_path: str | Path, hr_path: str | Path, default_value: float = 0.1) -> None:
         self.lr_path = lr_path
         self.hr_path = hr_path
