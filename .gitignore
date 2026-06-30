@@ -2,6 +2,7 @@
 # Project Specific Folders
 # ==========================================
 sen2sr/data/
+sen2sr/model/
 segformer/data/
 
 # ==========================================
