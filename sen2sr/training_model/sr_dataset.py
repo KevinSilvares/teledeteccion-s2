@@ -1,6 +1,7 @@
 import torch
 import random
 import rasterio
+import logging
 import numpy as np
 from pathlib import Path
 from torch.utils.data import Dataset
@@ -20,14 +21,12 @@ class SRDataset(Dataset):
         self.lr_files = sorted(Path(lr_path).glob("*.tif"))
         self.hr_files = sorted(Path(hr_path).glob("*.tif"))
 
-        if len(self.lr_files) != len(self.hr_files):
-            # error_msg = f"LR files ({len(self.lr_files)}) and HR files ({len(self.hr_files)}) must have exact number of files."
-            # logger.error(error_msg)
-            raise RuntimeError(f"LR files ({len(self.lr_files)}) and HR files ({len(self.hr_files)}) must have exact number of files.")
-        if len(self.lr_files) >= 0:
+        if len(self.lr_files) <= 0:
             raise RuntimeError(f"LR directory has no files. Check {lr_path}")
-        if len(self.hr_files) >= 0:
+        if len(self.hr_files) <= 0:
             raise RuntimeError(f"HR directory has no files. Check {hr_path}")
+        if len(self.lr_files) != len(self.hr_files):
+            raise RuntimeError(f"LR files ({len(self.lr_files)}) and HR files ({len(self.hr_files)}) must have exact number of files.")
 
 
     def __len__(self) -> int:
@@ -87,7 +86,7 @@ class SRDataset(Dataset):
         return tensor
 
 
-    def _extract_4_bands(tensor: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def _extract_4_bands(self, tensor: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Extracts the R, G, B and NIR bands from a 10-band Sentinel-2 tensor.
         Band Order: [B02, B03, B04, B05, B06, B07, B08, B8A, B11, B12]
@@ -95,7 +94,7 @@ class SRDataset(Dataset):
         r = tensor[0:1, :, :]
         g = tensor[1:2, :, :]
         b = tensor[2:3, :, :]
-        nir = tensor[6:7, :, :]
+        nir = tensor[3:4, :, :]
         return r, g, b, nir
 
 
@@ -106,15 +105,15 @@ class SRDataset(Dataset):
             hr_img, hr_no_data = self._read(self.hr_files[i])
 
             # Normalizes values
-            lr_10_bands = self._normalize(lr_img, lr_no_data)
-            hr_10_bands = self._normalize(hr_img, hr_no_data)
+            lr_tensor = self._normalize(lr_img, lr_no_data)
+            hr_tensor = self._normalize(hr_img, hr_no_data)
 
             # Extracts the 4 target bands
-            lr_r, lr_g, lr_b, lr_nir = self._extract_4_bands(lr_10_bands)
-            hr_r, hr_g, hr_b, hr_nir = self._extract_4_bands(hr_10_bands)
+            lr_r, lr_g, lr_b, lr_nir = self._extract_4_bands(lr_tensor)
+            hr_r, hr_g, hr_b, hr_nir = self._extract_4_bands(hr_tensor)
 
             # Builds the 10 band tensor using the default value for the missing bands
-            _, height, width = lr_4_bands_tensor.shape
+            _, height, width = lr_tensor.shape
             dummy_band = torch.full((1, height, width), self.default_value, dtype = torch.float32)
             
             input_10_bands = torch.cat([
@@ -144,4 +143,4 @@ class SRDataset(Dataset):
 
             # Gets a random index to keep training alive
             rand_index = random.randint(0 , len(self.lr_files) - 1)
-            return self.__get_item__(rand_index)
+            return self.__getitem__(rand_index)

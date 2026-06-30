@@ -40,7 +40,7 @@ def get_model(config: TrainConfig, device: torch.device) -> torch.nn.Module:
 
 def train_epoch(
     model: torch.nn.Module,
-    dataloder: DataLoader,
+    dataloader: DataLoader,
     criterion: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
     device: torch.device
@@ -67,13 +67,13 @@ def train_epoch(
         optimizer.step()
 
         total_loss += loss.item()
-    return total_loss / len(datalaoder)
+    return total_loss / len(dataloader)
 
 
 @torch.no_grad()
 def validate(
     model: torch.nn.Module,
-    dataloder: DataLoader,
+    dataloader: DataLoader,
     criterion: torch.nn.Module,
     device: torch.device
     ) -> float:
@@ -90,7 +90,7 @@ def validate(
         loss_val = criterion(pred_val, batch_hr_val)
 
         total_loss += loss_val.item()
-    return total_loss / len(datalaoder)
+    return total_loss / len(dataloader)
 
 
 def main() -> None:
