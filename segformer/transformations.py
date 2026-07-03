@@ -2,7 +2,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 
-def get_transformations(self, max_bright_contrast: float = 0.25, probability: float = 0.50) -> tuple[A.Compose, A.Compose]:
+def get_transformations(max_bright_contrast: float = 0.25, probability: float = 0.50) -> tuple[A.Compose, A.Compose]:
     """
     Creates transformations for Data Augmentation while still mainting realistic geographical data.
     """
