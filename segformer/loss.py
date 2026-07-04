@@ -1,6 +1,7 @@
 import evaluate
 import torch
 import torch.nn.functional as F
+import numpy as np
 
 
 class IOU:
@@ -33,7 +34,7 @@ class IOU:
         labels_np = labels_tensor.cpu().numpy()
 
         results = self.criterion.compute(
-            predictions = preds,
+            predictions = preds_np,
             references = labels_np,
             num_labels = self.num_labels,
             ignore_index = 255 # this ignores the black borders 

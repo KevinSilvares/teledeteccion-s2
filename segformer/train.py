@@ -1,4 +1,5 @@
 import logging
+import torch
 
 from transformers import TrainingArguments, Trainer
 from pathlib import Path
@@ -26,6 +27,7 @@ def main() -> None:
     config = TrainConfig()
 
     logger.info("Loading Training and Validation Datasets.")
+    logger.info(str(config.tif_train_path) + str(config.mask_train_path))
     dataset_train = SegFormerDataset(config.tif_train_path, config.mask_train_path, True)
     dataset_val = SegFormerDataset(config.tif_val_path, config.mask_val_path, False)
     logger.debug(f"Loaded {len(dataset_train)} train patches and {len(dataset_val)} validation patches.")

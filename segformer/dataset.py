@@ -3,7 +3,7 @@ import rasterio
 import logging
 import numpy as np
 from pathlib import Path
-from torch.utilts.data import Dataset
+from torch.utils.data import Dataset
 from PIL import Image
 
 import transformations as T 
@@ -14,16 +14,16 @@ class SegFormerDataset(Dataset):
         self.tif_dir = Path(tif_dir)
         self.mask_dir = Path(mask_dir)
 
-        transform_train, tranform_val = T.get_transformations()
+        transform_train, transform_val = T.get_transformations()
         self.transformations = transform_train if is_train else transform_val
         
         self.logger = logging.getLogger(__name__)
 
         self.tif_files = sorted(self.tif_dir.glob("*.tif"))
         if not self.tif_files:
-            raise RuntimeError(f"No .tif files found in {self.tif_files}")
+            raise RuntimeError(f"No .tif files found in {self.tif_dir}")
 
-        self.logger.info(f"Initialized {'Training' if is_train else 'Validation'} Dataset with {len(tif_files)} files.")
+        self.logger.info(f"Initialized {'Training' if is_train else 'Validation'} Dataset with {len(self.tif_files)} files.")
     
 
     def __len__(self) -> int:
@@ -69,7 +69,7 @@ class SegFormerDataset(Dataset):
         if not mask_path.exists():
             raise FileNoutFoundError(f"Mask not found: {mask_path}.")
         
-        mask_pil = image.open(mask_path).convert("L")
+        mask_pil = Image.open(mask_path).convert("L")
         mask_np = np.array(mask_pil)
 
         # Sets a threshold for the patlabel
@@ -97,12 +97,12 @@ class SegFormerDataset(Dataset):
             
             mask = self._build_mask(mask_path)
 
-            img_tensor, mask_tensor = self_apply_transforms(img_rgbn, mask)
+            img_tensor, mask_tensor = self._apply_transforms(img_rgbn, mask)
 
             # Hugging-Face formatted dict
             return {
                 "pixel_values": img_tensor,
-                "labels": mask_long()
+                "labels": mask_tensor.long()
             }
         except Exception as e:
             self.logger.error(f"Error loading {self.tif_files[i].name}: {e}")

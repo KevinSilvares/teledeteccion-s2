@@ -12,7 +12,7 @@ class TrainConfig:
     learning_rate: float = 1e-6
 
     # Paths
-    base_dir: Path = Path(__file__).resolve().parent.parent
+    base_dir: Path = Path(__file__).resolve().parent
     tif_train_path: Path = base_dir / "data" / "train" / "imgs_tif"
     tif_val_path: Path = base_dir / "data" / "val" / "imgs_tif"
     mask_train_path: Path = base_dir / "data" / "train" / "mask"
