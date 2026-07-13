@@ -1,6 +1,7 @@
 import torch
 import rasterio
 import logging
+import numpy as np
 import torch.nn.functional as F
 from pathlib import Path
 from rasterio.windows import Window
@@ -32,6 +33,8 @@ class Model:
             ignore_mismatched_sizes = True,
             use_safetensors = True
         )
+
+        model.config.num_channels = 4
 
         # Changes the original 3 channel input layer for a new 4 input channels layer so Segformer can use R, G, B, NIR
         self.logger.debug("Finding the 3-channel input layer.")
@@ -86,7 +89,10 @@ class Model:
         """
 
         self.logger.info(f"Loading pre-trained model from {model_path}")
-        self.model = SegformerForSemanticSegmentation.from_pretrained(model_path)
+        self.model = SegformerForSemanticSegmentation.from_pretrained(
+            model_path,
+            num_channels = 4
+        )
         self.model.to(self.device)
         self.logger.info("Pre-trained model loaded.")
 
@@ -109,7 +115,7 @@ class Model:
 
         output_path.parent.mkdir(parents = True, exist_ok = True)
 
-        self.logger-info(f"Segmenting: {tif_path.name}")
+        self.logger.info(f"Segmenting: {tif_path.name}")
 
         with rasterio.open(tif_path) as src:
             metadata = src.profile.copy()
@@ -133,11 +139,24 @@ class Model:
                         if not patch.any():
                             continue
                         
-                        tensor = torch.from_numpy(patch).float().unsqueeze(0).to(self.device)
+                        # Band reordering
+                        patch_rgbn = np.concatenate((
+                            patch[2:3, :, :],
+                            patch[1:2, :, :],
+                            patch[0:1, :, :],
+                            patch[3:4, :, :]
+                        ), axis = 0)
+
+                        # Normalization (clipping 2nd/98th percentile)
+                        p2, p98 = np.percentile(patch_rgbn, (2, 98))
+                        patch_rgbn = (patch_rgbn - p2) / (p98 - p2 + 1e-8)
+                        patch_clipped = np.clip(patch_rgbn, 0.0, 1.0)
+
+                        tensor = torch.from_numpy(patch_clipped).float().unsqueeze(0).to(self.device)
 
                         with torch.no_grad():
                             output = self.model(pixel_values = tensor)
-                            logits = output = output.logits
+                            logits = output.logits
 
                             # Resize logits to the exact patch shape
                             logits_resized = F.interpolate(

@@ -8,7 +8,7 @@ class TrainConfig:
     """
     # Hyperparameters
     batch_size: int = 2
-    epochs: int = 50
+    epochs: int = 200
     learning_rate: float = 1e-6
 
     # Paths
