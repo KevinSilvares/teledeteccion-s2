@@ -67,14 +67,14 @@ class SegFormerDataset(Dataset):
         Loads the mask and converts it to binary classes. (0 = background, 1 = Path).
         """
         if not mask_path.exists():
-            raise FileNoutFoundError(f"Mask not found: {mask_path}.")
+            raise FileNotFoundError(f"Mask not found: {mask_path}.")
         
         mask_pil = Image.open(mask_path).convert("L")
         mask_np = np.array(mask_pil)
 
         # Sets a threshold for the patlabel
-        mask = (mask_np < 128).astype(np.int64)
-        return mask
+        # mask = (mask_np < 128).astype(np.int64)
+        return mask_np.astype(np.int64)
     
 
     def _apply_transforms(self, img: np.ndarray, mask: np.ndarray) -> tuple[torch.Tensor, torch.Tensor]:
