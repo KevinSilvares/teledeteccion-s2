@@ -1,0 +1,12 @@
+torch
+torchvision
+transformers==5.12.1
+sen2sr==0.8.5
+rasterio==1.4.4
+xarray==2026.4.0
+rioxarray==0.19.0
+numpy==2.4.6
+pandas==3.0.3
+opencv-python-headless==5.0.0.93
+accelerate==1.14.0
+gradio
