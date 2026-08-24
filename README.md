@@ -5,6 +5,8 @@
 ![Hugging Face](https://img.shields.io/badge/Transformers-SegFormer-FFD21E?logo=huggingface&logoColor=black)
 ![GIS](https://img.shields.io/badge/GIS-GDAL%20%2F%20Rasterio-347434)
 
+> 🇪🇸 Esta es la versión en español del README. [Read in English](/README.en.md)
+
 ## Problema e Impacto
 La cartografía de vías rurales y cortafuegos en zonas densamente forestadas es un desafío vital para la prevención de incendios. Este proyecto automatiza la extracción de estas geometrías procesando datos de la API de Copernicus, mejorando su resolución nativa (10 m/px a 2.5 m/px) y aplicando visión artificial.
 
@@ -27,15 +29,19 @@ La cartografía de vías rurales y cortafuegos en zonas densamente forestadas es
 El modelo identifica formas alargadas y sinuosas típicas de los caminos, demostrando que la base geométrica ha sido aprendida. También ha desarrollado alta sensibilidad al suelo desnudo (útil para detectar cortafuegos).
 
 ![Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W](./docs/imgs/img_og_2.png)
+
 (Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W)
 
 ![(Máscara del modelo Preliminar v0.1)](./docs/imgs/img_mask_2.png)
+
 (Máscara del modelo Preliminar v0.1)
 
 ![Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W](./docs/imgs/img_og_1.png)
+
 Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W
 
 ![(Máscara del modelo Preliminar v0.1)](./docs/imgs/img_mask_1.png)
+
 (Máscara del modelo Preliminar v0.1)
 
 ## Roadmap

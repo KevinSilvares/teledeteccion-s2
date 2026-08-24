@@ -29,15 +29,19 @@ Mapping rural roads and firebreaks in densely forested areas is a crucial challe
 The model identifies the elongated and sinuous shapes typical of rural roads, demonstrating that the geometric base has been learned. It has also developed high sensitivity to bare soil (useful for detecting firebreaks).
 
 ![Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W](./docs/imgs/img_og_2.png)
+
 (Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W)
 
 ![(Preliminary Model v0.1 Mask)](./docs/imgs/img_mask_2.png)
+
 (Preliminary Model v0.1 Mask)
 
 ![Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W](./docs/imgs/img_og_1.png)
+
 Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W
 
 ![(Preliminary Model v0.1 Mask)](./docs/imgs/img_mask_1.png)
+
 (Preliminary Model v0.1 Mask)
 
 ## Roadmap
