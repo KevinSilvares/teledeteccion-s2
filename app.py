@@ -8,7 +8,6 @@ from pathlib import Path
 
 from sen2sr_pipeline.resolver.resolver_config import ResolverConfig
 from sen2sr_pipeline.resolver.resolver import get_model as get_sen2sr, _process_image as run_sen2sr
-from segformer import segment
 
 from segformer.model import Model
 
@@ -122,16 +121,16 @@ class App:
             return np.zeros((512, 512, 3), dtype = np.uint8)
 
 
-    def run(self) -> None:
+    def run(self, share: bool = False) -> None:
         """
         Runs web server and builds the UI.
         """
         if not hasattr(self, "ui"):
             self.build_ui()
         
-        self.ui.launch()
+        self.ui.launch(share = share)
 
     
 if __name__ == "__main__":
     app = App()
-    app.run()
+    app.run(share = True)
