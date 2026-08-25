@@ -9,7 +9,7 @@ from tqdm import tqdm
 from pathlib import Path
 from affine import Affine
 
-from resolver_config import ResolverConfig
+from .resolver_config import ResolverConfig
 
 logging.basicConfig(level = logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ from datetime import datetime
 from tqdm import tqdm
 from pathlib import Path
 
-from model import Model
+from .model import Model
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
