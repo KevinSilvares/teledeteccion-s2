@@ -1,8 +1,8 @@
 # ==========================================
 # Project Specific Folders
 # ==========================================
-sen2sr/data/
-sen2sr/model/
+sen2sr_pipeline/data/
+sen2sr_pipeline/model/
 segformer/data/
 segformer/model/
 
