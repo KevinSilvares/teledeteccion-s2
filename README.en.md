@@ -7,6 +7,8 @@
 
 > 🇬🇧 This is the English version of the README. [Leer en español](/README.md)
 
+[![Open Demo in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1l7XRxP14V5jfWV47x9xbktujC_N4kJeH?usp=sharing)
+
 ## Problem and Impact
 Mapping rural roads and firebreaks in densely forested areas is a crucial challenge for fire prevention. This project automates the extraction of these geometries by processing data from the Copernicus API, improving their native resolution (from 10 m/px to 2.5 m/px) and applying computer vision.
 

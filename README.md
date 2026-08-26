@@ -7,6 +7,8 @@
 
 > 🇪🇸 Esta es la versión en español del README. [Read in English](/README.en.md)
 
+[![Abrir Demo en Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1l7XRxP14V5jfWV47x9xbktujC_N4kJeH?usp=sharing)
+
 ## Problema e Impacto
 La cartografía de vías rurales y cortafuegos en zonas densamente forestadas es un desafío vital para la prevención de incendios. Este proyecto automatiza la extracción de estas geometrías procesando datos de la API de Copernicus, mejorando su resolución nativa (10 m/px a 2.5 m/px) y aplicando visión artificial.
 
@@ -47,5 +49,5 @@ Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°55'14.6
 ## Roadmap
 - [ ] **Hard Negative Mining:** Inclusión de parches con grandes claros de tierra sin caminos para evitar falsos positivos.
 - [ ] **Optimización Topológica:** Mejora de la función de pérdida (implementación de *clDice* o *TopoLoss*) para penalizar fuertemente la fragmentación de la línea del camino.
-- [ ] Despliegue de demo interactiva.
+- [x] Despliegue de demo interactiva.
 - [ ] Guía de reproducibilidad.
