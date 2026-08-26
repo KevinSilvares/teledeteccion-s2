@@ -39,6 +39,13 @@ class App:
         """
         Builds the UI using Gradio components.
         """
+        base_script = Path(__file__).resolve().parent
+        examples_dir = base_script / "test_tif_files"
+
+        example_files = []
+        if examples_dir.exists():
+            example_files = [[str(f)] for f in examples_dir.glob("*.tif")]
+
         with gr.Blocks(theme = gr.themes.Base()) as self.ui:
             gr.Markdown("# Sentinel-2 Road Detection")
             gr.Markdown("Upload a Sentinel-2 multispectral `.tif` file (10 bands) to run Super-Resolution and Semantic Segmentation")
@@ -46,6 +53,14 @@ class App:
             with gr.Row():
                 with gr.Column():
                     input_file = gr.File(label = "Input patch (.tif)")
+
+                    if example_files:
+                        gr.Examples(
+                            examples = example_files,
+                            inputs = input_file,
+                            label = "Test Files (Click to load)"
+                        )
+                        
                     submit_button = gr.Button("Process")
 
                     with gr.Column():
