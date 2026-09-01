@@ -1,53 +1,54 @@
-# Sentinel-2 Road Detection: Super-Resolución y Segmentación Semántica
+# Sentinel-2 Road Detection: Super-Resolution and Semantic Segmentation
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?logo=pytorch&logoColor=white)
 ![Hugging Face](https://img.shields.io/badge/Transformers-SegFormer-FFD21E?logo=huggingface&logoColor=black)
 ![GIS](https://img.shields.io/badge/GIS-GDAL%20%2F%20Rasterio-347434)
 
-> 🇪🇸 Esta es la versión en español del README. [Read in English](/README.en.md)
+> 🇬🇧 This is the English version of the README. [Leer en español](/README.es.md)
 
-[![Abrir Demo en Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1l7XRxP14V5jfWV47x9xbktujC_N4kJeH?usp=sharing)
+#### Try out the demo!
+[![Open Demo in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1l7XRxP14V5jfWV47x9xbktujC_N4kJeH?usp=sharing)
 
-## Problema e Impacto
-La cartografía de vías rurales y cortafuegos en zonas densamente forestadas es un desafío vital para la prevención de incendios. Este proyecto automatiza la extracción de estas geometrías procesando datos de la API de Copernicus, mejorando su resolución nativa (10 m/px a 2.5 m/px) y aplicando visión artificial.
+## Problem and Impact
+Mapping rural roads and firebreaks in densely forested areas is a crucial challenge for fire prevention. This project automates the extraction of these geometries by processing data from the Copernicus API, improving their native resolution (from 10 m/px to 2.5 m/px) and applying computer vision.
 
-> **Nota:** Aunque el programa PNOA ofrece resoluciones altísimas (0.25-0.5 m/px), los vuelos se realizan cada 3 o más años. Sentinel-2 ofrece una captura casi en tiempo real, vital para la actualización logística.
+> **Note:** Although the PNOA program offers extremely high resolutions (0.25-0.5 m/px), flights are conducted every 3 or more years. Sentinel-2 provides near real-time captures, which is vital for logistics updates.
 
-## Arquitectura y Stack Tecnológico
-- **Lenguajes y Frameworks:** Python, PyTorch, Transformers (Hugging-Face)
-- **Modelos Base:** [Sen2SR](https://github.com/ESAOpenSR/SEN2SR) (Super-Resolución) y [SegFormer](https://huggingface.co/docs/transformers/model_doc/segformer) [mit-b3](https://huggingface.co/nvidia/mit-b3) (Segmentación)
-- **Datos y GIS:** Imágenes Sentinel-2, Ortofotos [PNOA](https://pnoa.ign.es/), QGIS, Rasterio, Xarray, GDAL
+## Architecture and Tech Stack
+- **Languages and Frameworks:** Python, PyTorch, Transformers (Hugging Face)
+- **Base Models:** [Sen2SR](https://github.com/ESAOpenSR/SEN2SR) (Super-Resolution) and [SegFormer](https://huggingface.co/docs/transformers/model_doc/segformer) [mit-b3](https://huggingface.co/nvidia/mit-b3) (Segmentation)
+- **Data and GIS:** Sentinel-2 Imagery, [PNOA](https://pnoa.ign.es/) Orthophotos, QGIS, Rasterio, Xarray, GDAL
 
-## Retos Técnicos Resueltos
-- **Adaptación de Arquitectura de SegFormer a 4 canales:** Se modificó la capa de entrada original del modelo Segformer mit-b3 (diseñada originalmente para RGB) con PyTorch para procesar una cuarta banda (Infrarrojo cercano - NIR), crucial para el análisis de vegetación.
-- **Descarga masiva y adaptación de los rásters (resolución de 10 m/px a 2.5 m/px, conversión de 10 bandas a 4 bandas):** Se ha logrado descargar imágenes de forma masiva para entrenar un modelo Sen2SR con la imágenes capturas por el PNOA (originalmente a 0.25-0.5 m/px) para lograr una resolución a 2.5 m/px, usando sólo las bandas R, G, B y NIR del Sentinel-2 (originalmente a 10 m/px).
-- **Descarga masiva y manejo de errores de imágenes satelitales Sentinel-2:** Se ha logrado descargar de forma masiva imágenes del Sentinel-2 mediante *POIs (Points Of Interest -* Puntos de Interés) para su posterior Super-Resolución manejando errores y gestionando auto autenticaciones con la API de Copernicus, así como el procesamiento automático de sus respectivos sistemas de coordenadas (CRS)
-- **Super-Resolución masiva:** Implementación de scripts para inferir de forma masiva los datos anteriormente descargados.
-- **Manejo de Errores Geoespaciales:** Manejo de recortes dinámicos en memoria para solucionar desajustes de matrices (”*Off-By-One pixel errors*”) generados por el redondeo de QGIS (GDAL) en las máscaras.
-- **Tiling y Normalización:** Scripting automatizado para dividir grandes TIFs de 2048x2048 en parches de 512x512, aplicando recortes de percentiles (2º-98º) consistentes tanto en entrenamiento como en inferencia.
+## Technical Challenges Solved
+- **SegFormer Architecture Adaptation to 4 channels:** The original input layer of the SegFormer mit-b3 model (originally designed for RGB) was modified using PyTorch to process a fourth band (Near-Infrared - NIR), crucial for vegetation analysis.
+- **Mass downloading and raster adaptation (resolution from 10 m/px to 2.5 m/px, conversion from 10 bands to 4 bands):** Achieved mass downloading of images to train a Sen2SR model with images captured by PNOA (originally at 0.25-0.5 m/px) to achieve a resolution of 2.5 m/px, using only the R, G, B, and NIR bands from Sentinel-2 (originally at 10 m/px).
+- **Mass downloading and error handling of Sentinel-2 satellite imagery:** Achieved mass downloading of Sentinel-2 images using *POIs (Points of Interest)* for subsequent Super-Resolution, handling errors, managing auto-authentication with the Copernicus API, and automatically processing their respective Coordinate Reference Systems (CRS).
+- **Mass Super-Resolution:** Implementation of scripts for massive inference on the previously downloaded data.
+- **Geospatial Error Handling:** Dynamic memory cropping management to resolve matrix mismatches (*Off-By-One pixel errors*) generated by QGIS (GDAL) rounding in spatial masks.
+- **Tiling and Normalization:** Automated scripting to split large 2048x2048 TIFs into 512x512 patches, applying consistent percentile clipping (2nd-98th) for both training and inference.
 
-## Resultados Preliminares (v0.1)
-El modelo identifica formas alargadas y sinuosas típicas de los caminos, demostrando que la base geométrica ha sido aprendida. También ha desarrollado alta sensibilidad al suelo desnudo (útil para detectar cortafuegos).
+## Preliminary Results (v0.1)
+The model identifies the elongated and sinuous shapes typical of rural roads, demonstrating that the geometric base has been learned. It has also developed high sensitivity to bare soil (useful for detecting firebreaks).
 
-![Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W](./docs/imgs/img_og_2.png)
+![Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W](./docs/imgs/img_og_2.png)
 
-(Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W)
+(Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°57'20.9"N 6°24'04.7"W)
 
-![(Máscara del modelo Preliminar v0.1)](./docs/imgs/img_mask_2.png)
+![(Preliminary Model v0.1 Mask)](./docs/imgs/img_mask_2.png)
 
-(Máscara del modelo Preliminar v0.1)
+(Preliminary Model v0.1 Mask)
 
-![Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W](./docs/imgs/img_og_1.png)
+![Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W](./docs/imgs/img_og_1.png)
 
-Imagen Super-Resuelta a 2.5 m/px cerca de Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W
+Super-Resolved Image at 2.5 m/px near Villablino, León. Coords: 42°55'14.6"N 6°16'55.8"W
 
-![(Máscara del modelo Preliminar v0.1)](./docs/imgs/img_mask_1.png)
+![(Preliminary Model v0.1 Mask)](./docs/imgs/img_mask_1.png)
 
-(Máscara del modelo Preliminar v0.1)
+(Preliminary Model v0.1 Mask)
 
 ## Roadmap
-- [ ] **Hard Negative Mining:** Inclusión de parches con grandes claros de tierra sin caminos para evitar falsos positivos.
-- [ ] **Optimización Topológica:** Mejora de la función de pérdida (implementación de *clDice* o *TopoLoss*) para penalizar fuertemente la fragmentación de la línea del camino.
-- [x] Despliegue de demo interactiva.
-- [ ] Guía de reproducibilidad.
+- [ ] **Hard Negative Mining:** Inclusion of patches with large earth clearings without roads to prevent false positives.
+- [ ] **Topological Optimization:** Improvement of the loss function (e.g., implementation of *clDice* or *TopoLoss*) to heavily penalize road line fragmentation.
+- [ ] Interactive demo deployment.
+- [ ] Reproducibility guide.
